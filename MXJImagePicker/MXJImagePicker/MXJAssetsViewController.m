@@ -16,6 +16,9 @@
     UICollectionView *mainCollectionView;
     ALAssetsLibrary *library;
     NSMutableArray *selectedAssetList;
+    
+    UIButton *previewButton;
+    UIButton *chooseButton;
 }
 
 @end
@@ -25,6 +28,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+    [self setupNavigationItems];
     
     assetList = [NSMutableArray new];
     selectedAssetList = [NSMutableArray new];
@@ -36,7 +41,7 @@
     layout.itemSize = CGSizeMake(70, 70);
     layout.minimumInteritemSpacing = 0;
     layout.minimumLineSpacing = 5;
-    layout.sectionInset = UIEdgeInsetsMake(5, 5, 5, 5);
+    layout.sectionInset = UIEdgeInsetsMake(5, 5, 55, 5);
     mainCollectionView = [[UICollectionView alloc] initWithFrame:self.view.bounds
                                                           collectionViewLayout:layout];
     mainCollectionView.backgroundColor = [UIColor whiteColor];
@@ -47,6 +52,59 @@
     [self.view addSubview:mainCollectionView];
     
     [self fetchAssets];
+    
+    [self setupToolBar];
+}
+
+- (void)setupNavigationItems
+{
+    UIBarButtonItem *cancel = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+                                                                            target:self action:@selector(cancel)];
+    self.navigationItem.leftBarButtonItem = cancel;
+    
+//    UIBarButtonItem *done = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+//                                                                            target:self action:@selector(done)];
+//    self.navigationItem.rightBarButtonItem = done;
+}
+
+- (void)cancel
+{
+    [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)setupToolBar
+{
+    UIView *bar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height - 44, self.view.bounds.size.width, 44)];
+    bar.backgroundColor = [UIColor whiteColor];
+    bar.layer.borderColor = [[UIColor grayColor] CGColor];
+    bar.layer.borderWidth = 0.5;
+    [self.view addSubview:bar];
+    
+    previewButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [previewButton setTitle:@"预览" forState:UIControlStateNormal];
+    [previewButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    previewButton.frame = CGRectMake(10, 0, 44, 44);
+    [previewButton addTarget:self action:@selector(preview:) forControlEvents:UIControlEventTouchUpInside];
+    [bar addSubview:previewButton];
+    
+    chooseButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [chooseButton setTitle:@"完成" forState:UIControlStateNormal];
+    [chooseButton setTitleColor:[UIColor colorWithRed:0.227f green:0.682f blue:0.263f alpha:1.00f] forState:UIControlStateNormal];
+    chooseButton.frame = CGRectMake(self.view.bounds.size.width - 54, 0, 44, 44);
+    [chooseButton addTarget:self action:@selector(done) forControlEvents:UIControlEventTouchUpInside];
+    [bar addSubview:chooseButton];
+    
+    [self changeButtonsState];
+}
+
+- (void)done
+{
+    [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)preview:(id)sender
+{
+    NSLog(@"预览");
 }
 
 - (void)didReceiveMemoryWarning {
@@ -125,6 +183,16 @@ didTouchCheckButtonWithCheckFlag:(BOOL)isChecked;
             [selectedAssetList removeObject:asset];
         }
     }
+    
+    [self changeButtonsState];
+}
+
+- (void)changeButtonsState
+{
+    chooseButton.enabled = ([selectedAssetList count] > 0);
+    previewButton.enabled = ([selectedAssetList count] > 0);
+    chooseButton.alpha = ([selectedAssetList count] > 0)? 1.0:0.6;
+    previewButton.alpha = ([selectedAssetList count] > 0)? 1.0:0.6;
 }
 
 
